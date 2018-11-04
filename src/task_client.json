@@ -1,0 +1,115 @@
+{
+    "list": [
+        {
+            "Ip": "100.116.80.79",
+            "Port": "8880",
+            "Content": "list",
+            "Timeout": 3000,
+            "__type__": "TCPClientTask"
+        }
+    ],
+    "update": [
+        {
+            "Ip": "100.116.80.79",
+            "Port": "8880",
+            "Content": "branchExists",
+            "Timeout": 3000,
+            "__type__": "TCPClientTask"
+        },
+        {
+            "Ip": "100.116.80.79",
+            "Port": "8880",
+            "Content": "lock",
+            "Timeout": 3000,
+            "__type__": "TCPClientTask"
+        },
+        {
+            "Path": "/data/home/payneliu/git/crayfish",
+            "DstPath": "/",
+            "IP": "100.116.80.79",
+            "Port": "8880",
+            "Exclude": "/vendor/",
+            "__type__": "SendFileTask"
+        },
+        {
+            "Ip": "100.116.80.79",
+            "Port": "8880",
+            "Content": "update",
+            "Timeout": 3000,
+            "__type__": "TCPClientTask"
+        }
+    ],
+    "delete": [
+        {
+            "Ip": "100.116.80.79",
+            "Port": "8880",
+            "Content": "branchExists",
+            "Timeout": 3000,
+            "__type__": "TCPClientTask"
+        },
+        {
+            "Ip": "100.116.80.79",
+            "Port": "8880",
+            "Content": "lock",
+            "Timeout": 3000,
+            "__type__": "TCPClientTask"
+        },
+        {
+            "Ip": "100.116.80.79",
+            "Port": "8880",
+            "Content": "delete",
+            "Timeout": 3000,
+            "__type__": "TCPClientTask"
+        }
+    ],
+    "init": [
+        {
+            "Ip": "100.116.80.79",
+            "Port": "8880",
+            "Content": "branchNotExists",
+            "Timeout": 3000,
+            "__type__": "TCPClientTask"
+        },
+        {
+            "Ip": "100.116.80.79",
+            "Port": "8880",
+            "Content": "lock",
+            "Timeout": 3000,
+            "__type__": "TCPClientTask"
+        },
+        {
+            "Path": "/data/home/payneliu/git/crayfish",
+            "DstPath": "/",
+            "Exclude": "/vendor/",
+            "IP": "100.116.80.79",
+            "Port": "8880",
+            "__type__": "SendFileTask"
+        },
+        {
+            "Ip": "100.116.80.79",
+            "Port": "8880",
+            "Content": "init",
+            "Timeout": 3000,
+            "__type__": "TCPClientTask"
+        }
+    ],
+    "unlock": [
+        {
+            "Ip": "100.116.80.79",
+            "Port": "8880",
+            "Content": "unlock",
+            "Timeout": 3000,
+            "__type__": "TCPClientTask"
+        }
+    ],
+    "test": [
+        {
+            "Path": "E:\\git\\learn\\GO\\kite\\src",
+            "DstPath": "/",
+            "Exclude": "/vendor/",
+            "IP": "127.0.0.1",
+            "Port": "8880",
+            "__type__": "SendFileTask"
+        }
+    ]
+}

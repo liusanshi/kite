@@ -1,0 +1,109 @@
+[{
+    "Port": "8880",
+    "TaskDict": {
+        "list": [{
+            "__type__": "ListTask"
+        }],
+        "update": [{
+            "Args": ["chmod -R 0777 ${branchPath}/bootstrap/cache"],
+            "Cmd": "/bin/bash",
+            "Ignore": 0,
+            "__type__": "ShellTask"
+        },{
+            "Args": ["chmod -R 0777 ${branchPath}/storage"],
+            "Cmd": "/bin/bash",
+            "Ignore": 0,
+            "__type__": "ShellTask"
+        },{
+            "Args": ["php7 /home/payneliu/git/crayfish/artisan route:cache"],
+            "Cmd": "/bin/bash",
+            "Ignore": 0,
+            "__type__": "ShellTask"
+        },{
+            "__type__": "UpdateTask"
+        }],
+        "delete": [{
+            "FilePath": "/data/home/payneliu/services/apache-2.4/conf/httpd.conf",
+            "Encoding": "utf8",
+            "Replacer": [{
+                "Partten": "(?msU)###${branch}_begin###.*###${branch}_end###",
+                "Repl": ""
+            }],
+            "__type__": "ReplaceTask"
+        },{
+            "Args": ["/data/home/payneliu/services/apache-2.4/bin/httpd -k restart -f /data/home/payneliu/services/apache-2.4/conf/httpd.conf"],
+            "Cmd": "/bin/bash",
+            "Ignore": 0,
+            "__type__": "ShellTask"
+        },{
+            "__type__": "RemoveFileTask"
+        },{
+            "__type__": "DeleteTask"
+        }],
+        "init": [{
+            "__type__": "IfElse",
+            "Result": 0,
+            "Logic": "==",
+            "Cond": {
+                "FilePath": "/data/home/payneliu/services/apache-2.4/conf/httpd.conf",
+                "SubString": "ServerName ${branch}.qgame.qq.com",
+                "__type__": "ContainsTask"
+            },
+            "Body": [
+                {
+                    "FilePath": "/data/home/payneliu/services/apache-2.4/conf/httpd.conf",
+                    "Encoding": "utf8",
+                    "Replacer": [{
+                        "Partten": "###VirtualHostPlaceholder###",
+                        "Repl": "###${branch}_begin###\n<VirtualHost *>\nSetEnv APP_ENV dev\nDocumentRoot ${branchPath}/public/\nServerName ${branch}.qgame.qq.com\nErrorLog logs/${branch}.qgame.qq.com-error_log\nCustomLog logs/${branch}.qgame.qq.com-access_log common\n<Directory ${branchPath}/public/>\nOptions FollowSymLinks \nAllowOverride All\n#Order allow,deny \n#Allow from all\n</Directory>\n</VirtualHost>\n###${branch}_end###\n\n###VirtualHostPlaceholder###"
+                    }],
+                    "__type__": "ReplaceTask"
+                }
+            ]
+        },{
+            "Args": ["chmod -R 0777 ${branchPath}/bootstrap/cache"],
+            "Cmd": "/bin/bash",
+            "Ignore": 0,
+            "__type__": "ShellTask"
+        },{
+            "Args": ["chmod -R 0777 ${branchPath}/storage"],
+            "Cmd": "/bin/bash",
+            "Ignore": 0,
+            "__type__": "ShellTask"
+        },{
+            "Args": ["/data/home/payneliu/services/apache-2.4/bin/httpd -k restart -f /data/home/payneliu/services/apache-2.4/conf/httpd.conf"],
+            "Cmd": "/bin/bash",
+            "Ignore": 0,
+            "__type__": "ShellTask"
+        },{
+            "Args": ["php7 /home/payneliu/git/crayfish/artisan route:cache"],
+            "Cmd": "/bin/bash",
+            "Ignore": 0,
+            "__type__": "ShellTask"
+        },{
+            "Args": ["php7 /home/payneliu/git/crayfish/artisan storage:link"],
+            "Cmd": "/bin/bash",
+            "Ignore": 0,
+            "__type__": "ShellTask"
+        },{
+            "__type__": "InitTask"
+        }],
+        "lock": [{
+            "__type__": "LockTask"
+        }],
+        "unlock": [{
+            "__type__": "UnlockTask"
+        }],
+        "branchExists": [{
+            "__type__": "CheckBranchExistedTask"
+        }],
+        "branchNotExists": [{
+            "__type__": "CheckBranchNotExistedTask"
+        }],
+        "upload": [{
+            "IPLists": "127.0.0.1",
+            "__type__": "ReceiveFileTask"
+        }]
+    },
+    "__type__": "TCPServerTask"
+}]
