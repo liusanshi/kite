@@ -57,6 +57,7 @@ func UnCompressStream(reader io.Reader, write io.Writer) error {
 	if err != nil {
 		return err
 	}
+	defer zr.Close()
 	_, err = io.Copy(write, zr)
 	return err
 }
