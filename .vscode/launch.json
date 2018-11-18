@@ -27,7 +27,7 @@
 				"--path=E:\\git\\kite\\src",
 				"--cmd=init",
                 "--b=test2",
-                "--compore=1"
+                "--compress=1"
 			]
 		}
     ]
