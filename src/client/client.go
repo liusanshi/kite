@@ -12,7 +12,7 @@ import (
 )
 
 //Client 执行命令
-func Client(path, cmd, branch, work string) {
+func Client(path, cmd, branch, work string, iscompress bool) {
 	if len(path) == 0 {
 		path = util.GetCurrentPath()
 	}
@@ -36,6 +36,7 @@ func Client(path, cmd, branch, work string) {
 	session.TaskName = cmd
 	session.Branch = branch
 	session.WorkSpace = work
+	session.Compress = iscompress
 	err = taskList.Run(session)
 	if err != nil && err != io.EOF {
 		fmt.Printf("任务执行失败: %v\n", err)

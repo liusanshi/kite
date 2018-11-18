@@ -12,22 +12,17 @@ import (
 
 // Session 会话
 type Session struct {
-	ID   string
-	Ctx  context.Context
-	BMan *BranchManager
-	//WorkSpace 工作路径
-	WorkSpace string
-	//TaskName 任务名称
-	TaskName string
-	//参数
-	Args []string
-	//Branch 分支名称
-	Branch string
-	//request 请求对象
-	request *message.Request
-	//response 响应对象
-	response *message.Response
-	write    io.Writer
+	ID        string            //id
+	Ctx       context.Context   //上下文管理器
+	BMan      *BranchManager    //分支管理器
+	WorkSpace string            //WorkSpace 工作路径
+	TaskName  string            //TaskName 任务名称
+	Args      []string          //参数
+	Branch    string            //Branch 分支名称
+	Compress bool              //是否启用压缩
+	request   *message.Request  //request 请求对象
+	response  *message.Response //response 响应对象
+	write     io.Writer         //输出流
 }
 
 //Request 获取请求对象
@@ -71,6 +66,7 @@ func (c *Session) Copy(w io.Writer) *Session {
 		ID:        c.ID + "/id",
 		Ctx:       c.Ctx,
 		BMan:      c.BMan,
+		Compress: c.Compress,
 		write:     w,
 		WorkSpace: c.WorkSpace,
 	}

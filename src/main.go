@@ -24,6 +24,7 @@ func main() {
 	branch := flag.String("b", "", "分支名称")
 	work := flag.String("workspace", "", "工作区")
 	args := flag.String("args", "", "参数")
+	compression := flag.Bool("compore", false, "是否压缩数据")
 
 	flag.Parse()
 
@@ -37,7 +38,7 @@ func main() {
 		}
 		config.Set(params[0], params[1], "")
 	case "client":
-		client.Client(*fpath, *cmd, *branch, *work)
+		client.Client(*fpath, *cmd, *branch, *work, *compression)
 	case "server":
 		server.Sev(*fpath, *work)
 	default:

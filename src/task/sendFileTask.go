@@ -23,16 +23,12 @@ var filePathErr = fmt.Errorf("file path err") //文件遍历中断错误
 
 //SendFileTask 发送文件的任务
 type SendFileTask struct {
-	//Path 本地路径
-	Path string
-	//DstPath 目标路径
-	DstPath string
-	//IP ip
-	IP string
-	//Port 端口
-	Port string
-	//排除文件
-	Exclude []string
+	Path     string   //Path 本地路径
+	DstPath  string   //DstPath 目标路径
+	IP       string   //IP ip
+	Port     string   //Port 端口
+	Exclude  []string //排除文件
+	Compress bool     //是否启用压缩
 }
 
 //检查是否实现ITask接口
@@ -57,6 +53,9 @@ func (s *SendFileTask) Init(data map[string]interface{}) error {
 	if s.Port, ok = data["Port"].(string); !ok {
 		return fmt.Errorf("SendFileTask Port type error")
 	}
+	if s.Compress, ok = data["Compress"].(bool); !ok { //默认不压缩
+		s.Compress = false
+	}
 	exclude, _ := data["Exclude"].(string)
 	exclude = strings.TrimSpace(exclude)
 	if len(exclude) == 0 {
@@ -74,6 +73,7 @@ func (s *SendFileTask) ToMap() map[string]interface{} {
 	data["Port"] = s.Port
 	data["Path"] = s.Path
 	data["DstPath"] = s.DstPath
+	data["Compress"] = s.Compress
 	data["Exclude"] = strings.Join(s.Exclude, " ")
 	return data
 }
@@ -83,23 +83,23 @@ func (s *SendFileTask) Run(session *core.Session) error {
 	var (
 		errP = make(chan error)
 		errC = make(chan error)
-		done = make(chan struct{})
 		err  error
 	)
 	if len(session.WorkSpace) > 0 { //如果有命令行里面携带了path，则优先使用命令行里面的path
 		s.Path = session.WorkSpace
 	}
-	ctxP, cancelP := context.WithCancel(session.Ctx)
-	ctxC, cancelC := context.WithCancel(session.Ctx)
-	filepipe := s.consumerPath(ctxC, errC, done, session.Branch)
+	s.Compress = session.Compress || s.Compress //设置压缩属性
+	ctxP, cancel := context.WithCancel(session.Ctx)
+	// ctxC, cancelC := context.WithCancel(session.Ctx)
+	filepipe := s.consumerPath(cancel, errC, session.Branch)
 	s.productPath(ctxP, filepipe, errP)
 
 	select {
 	case err = <-errP:
-		cancelC()
+		break
 	case err = <-errC:
-		cancelP()
-	case <-done:
+		break
+	case <-ctxP.Done():
 		break
 	}
 	fmt.Println("upload finish")
@@ -139,7 +139,7 @@ func (s *SendFileTask) productPath(ctx context.Context, filepipe chan<- string, 
 }
 
 //路径消费者
-func (s *SendFileTask) consumerPath(ctx context.Context, cerr chan<- error, done chan struct{}, branch string) chan<- string {
+func (s *SendFileTask) consumerPath(cancel context.CancelFunc, cerr chan<- error, branch string) chan<- string {
 	var filepipe = make(chan string, maxUpload)
 	go func() {
 		var wait sync.WaitGroup
@@ -148,10 +148,6 @@ func (s *SendFileTask) consumerPath(ctx context.Context, cerr chan<- error, done
 			go func() {
 				defer wait.Done()
 				for file := range filepipe {
-					if isEnd(ctx) {
-						cerr <- filePathErr
-						return
-					}
 					err := s.upload(file, branch)
 					if err != nil {
 						if operr, ok := err.(*net.OpError); ok {
@@ -159,13 +155,14 @@ func (s *SendFileTask) consumerPath(ctx context.Context, cerr chan<- error, done
 							continue
 						}
 						cerr <- err
+						cancel()
 						return
 					}
 				}
 			}()
 		}
 		wait.Wait()
-		close(done)
+		cancel()
 	}()
 	return filepipe
 }
@@ -177,7 +174,7 @@ func (s *SendFileTask) upload(file, branch string) error {
 		return err
 	}
 	defer conn.Close()
-	msg, err := message.NewFileMessage(file, s.Path, s.DstPath, branch)
+	msg, err := message.NewFileMessage(file, s.Path, s.DstPath, branch, s.Compress)
 	defer msg.Close()
 	if err != nil {
 		return err

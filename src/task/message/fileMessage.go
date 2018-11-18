@@ -13,11 +13,12 @@ import (
 
 //FileMessage 文件消息 用于上传文件
 type FileMessage struct {
-	Length int64
-	Path   string
-	Branch string
-	md5    string
-	file   io.ReadWriteCloser
+	Length   int64         //文件长度
+	Path     string        //路径
+	Branch   string        //分支
+	md5      string        //文件的Md5
+	Compress bool          //是否启用压缩
+	file     io.ReadCloser //文件的资源地址
 }
 
 //检查是否实现IMessage接口
@@ -43,6 +44,10 @@ func (f *FileMessage) Parse(req *Request) error {
 	if err != nil {
 		return err
 	}
+	f.Compress, err = strconv.ParseBool(req.Get("compress"))
+	if err != nil {
+		return err
+	}
 	f.Path, err = url.PathUnescape(req.Get("path"))
 	if err != nil {
 		return err
@@ -59,20 +64,15 @@ func (f *FileMessage) Parse(req *Request) error {
 
 //WriteTo 写入数据
 func (f *FileMessage) WriteTo(w io.Writer) (int64, error) {
-	// cmd?length=xx&path=xx
-	// _, err := io.WriteString(w, fmt.Sprintf("%d/%s\n", f.Length, f.Path))
-	num, err := io.WriteString(w,
-		fmt.Sprintf("/upload?length=%d&path=%s&branch=%s&md5=%s\n",
-			f.Length,
-			url.PathEscape(filepath.ToSlash(filepath.Join(f.Branch, f.Path))), //将系统路径转换"/"
-			url.PathEscape(f.Branch),
-			f.md5))
+	url := fmt.Sprintf("/upload?length=%d&path=%s&branch=%s&md5=%s&compress=%s\n",
+		f.Length,
+		url.PathEscape(filepath.ToSlash(filepath.Join(f.Branch, f.Path))), //将系统路径转换"/"
+		url.PathEscape(f.Branch),
+		f.md5,
+		strconv.FormatBool(f.Compress))
+	// log.Println(url)
+	num, err := io.WriteString(w, url)
 	return int64(num), err
-	//先只是写入md5，后面md5不一致再写入文件
-	// if err != nil {
-	// 	return 0, err
-	// }
-	// return io.Copy(w, f.file)
 }
 
 // SendFile 发送文件
@@ -107,7 +107,15 @@ func (f *FileMessage) Save(path string) error {
 	if err != nil {
 		return err
 	}
-	_, err = io.Copy(file, io.LimitReader(f.file, f.Length))
+	if f.Compress {
+		nread, err := util.UnCompressStream2(io.LimitReader(f.file, f.Length))
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(file, nread)
+	} else {
+		_, err = io.Copy(file, io.LimitReader(f.file, f.Length))
+	}
 	if err == nil || err == io.EOF {
 		// fmt.Printf("upload success:%s\n", path)
 		return nil
@@ -116,7 +124,7 @@ func (f *FileMessage) Save(path string) error {
 }
 
 //NewFileMessage 文件消息
-func NewFileMessage(fpath, localpath, dstPath, branch string) (*FileMessage, error) {
+func NewFileMessage(fpath, localpath, dstPath, branch string, isCompress bool) (*FileMessage, error) {
 	if !util.FileExists(fpath) {
 		return nil, os.ErrNotExist
 	}
@@ -129,12 +137,29 @@ func NewFileMessage(fpath, localpath, dstPath, branch string) (*FileMessage, err
 		return nil, err
 	}
 	md5 := util.Md5(fpath)
+	var (
+		length int64
+		fwr    io.ReadCloser
+	)
+	//压缩文件
+	if isCompress {
+		cc, err := util.NewCompressConverter(file)
+		if err != nil {
+			return nil, err
+		}
+		fwr = cc
+		length = cc.Size()
+	} else {
+		length = info.Size()
+		fwr = file
+	}
 	return &FileMessage{
-		Length: info.Size(),
-		Path:   filepath.Join(dstPath, util.Splite(fpath, localpath)),
-		Branch: branch,
-		file:   file,
-		md5:    md5,
+		Length:   length,
+		Path:     filepath.Join(dstPath, util.Splite(fpath, localpath)),
+		Branch:   branch,
+		file:     fwr,
+		md5:      md5,
+		Compress: isCompress, //是否压缩
 	}, nil
 }
 

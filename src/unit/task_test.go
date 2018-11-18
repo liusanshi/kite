@@ -1,7 +1,9 @@
 package unit
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -137,5 +139,39 @@ func TestRegexp(t *testing.T) {
 	t.Log(reg.ReplaceAllString(strContent, ""))
 	if "" != strings.TrimSpace(reg.ReplaceAllString(strContent, "")) {
 		t.Fail()
+	}
+}
+
+func TestCompress(t *testing.T) {
+	file, err := os.OpenFile("E:\\git\\kite\\src\\client\\client.go", os.O_RDONLY, os.ModePerm)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	info, err := file.Stat()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	length := info.Size()
+	comp, _ := util.NewCompressConverter(file)
+	data, err := ioutil.ReadAll(comp)
+	err = ioutil.WriteFile("E:\\git\\kite\\src\\client\\client.go.zip", data, os.ModePerm) //到这里是对的
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	needUnCompData := bytes.NewReader(data)
+	uncomp, _ := util.NewUnCompressConverter(needUnCompData)
+	data, err = ioutil.ReadAll(uncomp)
+	err = ioutil.WriteFile("E:\\git\\kite\\src\\client\\client.1.go1", data, os.ModePerm) //到这里是对的
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	if length != int64(len(data)) {
+		t.Fatal("长度不一致")
+		return
 	}
 }
