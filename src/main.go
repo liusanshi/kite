@@ -24,7 +24,7 @@ func main() {
 	branch := flag.String("b", "", "分支名称")
 	work := flag.String("workspace", "", "工作区")
 	args := flag.String("args", "", "参数")
-	compression := flag.Bool("compore", false, "是否压缩数据")
+	compression := flag.Bool("compress", false, "是否压缩数据")
 
 	flag.Parse()
 

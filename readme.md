@@ -4,12 +4,13 @@
 1. list 列出所有的测试环境  
 >示例：
 ```
-./kite --func=client --path=/home/payneliu/git/kite/ --cmd=list --b=test1
+./kite --func=client --path=/home/payneliu/git/kite/ --cmd=list --b=test1 --compress=1
 其中：
 func: client表示客户端; server表示服务端
 path: 相关配置的存放位置(task_client.json)等地址
 cmd: 指令; 包含：(list、init、update、delete、unlock)
 b: 环境的名称(list、unlock命令时选填，其他必填)
+compress: 是否启用压缩，默认不启用
 ```
 2. init 创建一个测试环境  
 >示例：
