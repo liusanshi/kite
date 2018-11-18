@@ -17,9 +17,17 @@ type FileMessage struct {
 	Path     string        //路径
 	Branch   string        //分支
 	md5      string        //文件的Md5
-	Compress bool          //是否启用压缩
+	Compress CompressType  //压缩类型
 	file     io.ReadCloser //文件的资源地址
 }
+
+type CompressType int //压缩类型
+
+const (
+	NONE          CompressType = iota //不压缩不解压
+	COMPRESSION                       //压缩
+	UNCOMPRESSION                     //解压
+)
 
 //检查是否实现IMessage接口
 var _ IMessage = (*FileMessage)(nil)
@@ -44,9 +52,13 @@ func (f *FileMessage) Parse(req *Request) error {
 	if err != nil {
 		return err
 	}
-	f.Compress, err = strconv.ParseBool(req.Get("compress"))
+	compress, err := strconv.ParseBool(req.Get("compress"))
 	if err != nil {
 		return err
+	}
+	f.Compress = NONE
+	if compress {
+		f.Compress = UNCOMPRESSION
 	}
 	f.Path, err = url.PathUnescape(req.Get("path"))
 	if err != nil {
@@ -58,7 +70,12 @@ func (f *FileMessage) Parse(req *Request) error {
 		return err
 	}
 	f.md5 = req.Get("md5")
-	f.file = req.file
+	reader := io.LimitReader(req.file, f.Length)
+	if f.Compress == UNCOMPRESSION {
+		f.file = util.NewUnCompressConverter(reader)
+	} else {
+		f.file = util.NewNoneConverter(reader)
+	}
 	return nil
 }
 
@@ -69,7 +86,7 @@ func (f *FileMessage) WriteTo(w io.Writer) (int64, error) {
 		url.PathEscape(filepath.ToSlash(filepath.Join(f.Branch, f.Path))), //将系统路径转换"/"
 		url.PathEscape(f.Branch),
 		f.md5,
-		strconv.FormatBool(f.Compress))
+		strconv.FormatBool(f.Compress == COMPRESSION))
 	// log.Println(url)
 	num, err := io.WriteString(w, url)
 	return int64(num), err
@@ -107,15 +124,7 @@ func (f *FileMessage) Save(path string) error {
 	if err != nil {
 		return err
 	}
-	if f.Compress {
-		nread, err := util.UnCompressStream2(io.LimitReader(f.file, f.Length))
-		if err != nil {
-			return err
-		}
-		_, err = io.Copy(file, nread)
-	} else {
-		_, err = io.Copy(file, io.LimitReader(f.file, f.Length))
-	}
+	_, err = io.Copy(file, f.file)
 	if err == nil || err == io.EOF {
 		// fmt.Printf("upload success:%s\n", path)
 		return nil
@@ -140,6 +149,7 @@ func NewFileMessage(fpath, localpath, dstPath, branch string, isCompress bool) (
 	var (
 		length int64
 		fwr    io.ReadCloser
+		ctype  CompressType = NONE
 	)
 	//压缩文件
 	if isCompress {
@@ -149,6 +159,7 @@ func NewFileMessage(fpath, localpath, dstPath, branch string, isCompress bool) (
 		}
 		fwr = cc
 		length = cc.Size()
+		ctype = COMPRESSION
 	} else {
 		length = info.Size()
 		fwr = file
@@ -159,7 +170,7 @@ func NewFileMessage(fpath, localpath, dstPath, branch string, isCompress bool) (
 		Branch:   branch,
 		file:     fwr,
 		md5:      md5,
-		Compress: isCompress, //是否压缩
+		Compress: ctype, //压缩类型
 	}, nil
 }
 

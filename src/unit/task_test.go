@@ -163,7 +163,7 @@ func TestCompress(t *testing.T) {
 	}
 
 	needUnCompData := bytes.NewReader(data)
-	uncomp, _ := util.NewUnCompressConverter(needUnCompData)
+	uncomp := util.NewUnCompressConverter(needUnCompData)
 	data, err = ioutil.ReadAll(uncomp)
 	err = ioutil.WriteFile("E:\\git\\kite\\src\\client\\client.1.go1", data, os.ModePerm) //到这里是对的
 	if err != nil {

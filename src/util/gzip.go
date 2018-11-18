@@ -13,29 +13,44 @@ type streamExchange func(reader io.Reader, write io.Writer) (int64, error)
 //压缩转换器
 type CompressConverter struct {
 	size int64
+	wr   io.Reader
 	buff *bytes.Buffer
 }
 
 // 解压转换器
 type UnCompressConverter struct {
-	wr        io.Writer
-	size      int64
-	srcReader io.Reader
+	wr         io.Reader
+	gzipReader *gzip.Reader
+}
+
+//普通的转换器（不做任何处理）
+type NoneConverter struct {
+	wr io.Reader
 }
 
 var _ io.ReadCloser = (*CompressConverter)(nil)
-var _ io.WriteCloser = (*UnCompressConverter)(nil)
+var _ io.ReadCloser = (*UnCompressConverter)(nil)
+var _ io.ReadCloser = (*NoneConverter)(nil)
 
 // NewCompressConverter 创建一个压缩流转换器
-func NewCompressConverter(wr io.ReadCloser) (*CompressConverter, error) {
+func NewCompressConverter(wr io.Reader) (*CompressConverter, error) {
 	cc := &CompressConverter{}
 	err := cc.init(wr)
 	return cc, err
 }
 
 // NewUnCompressConverter 创建一个解压流转换器
-func NewUnCompressConverter(wr io.Writer, size int64) *UnCompressConverter {
-	return &UnCompressConverter{wr: wr, size: size}
+func NewUnCompressConverter(wr io.Reader) *UnCompressConverter {
+	return &UnCompressConverter{
+		wr: wr,
+	}
+}
+
+// NoneConverter 创建一个不处理任何事情的转换器
+func NewNoneConverter(wr io.Reader) *NoneConverter {
+	return &NoneConverter{
+		wr: wr,
+	}
 }
 
 func (cc *CompressConverter) Size() int64 {
@@ -43,13 +58,19 @@ func (cc *CompressConverter) Size() int64 {
 }
 
 func (cc *CompressConverter) Close() error {
+	if cc.wr != nil {
+		if c, ok := cc.wr.(io.Closer); ok {
+			return c.Close()
+		}
+	}
 	return nil
 }
 
-func (cc *CompressConverter) init(wr io.ReadCloser) error {
+func (cc *CompressConverter) init(wr io.Reader) error {
 	var zBuf bytes.Buffer
 	zw := gzip.NewWriter(&zBuf)
-	// initGzip(zw)
+	initGzip(zw)
+	cc.wr = wr
 	_, err := io.Copy(zw, wr)
 	if err != nil {
 		return err
@@ -65,21 +86,40 @@ func (cc *CompressConverter) Read(p []byte) (int, error) {
 }
 
 func (cc *UnCompressConverter) Close() error {
+	if cc.wr != nil {
+		if c, ok := cc.wr.(io.Closer); ok {
+			return c.Close()
+		}
+	}
 	return nil
 }
 
 // todo 实现可以支持解压的文件写入，向文件写入压缩流时，自动解压
-func (cc *UnCompressConverter) Write(p []byte) (int, error) {
-	// if cc.srcReader == nil {
-	// 	var zBuf bytes.Buffer
-	// 	zBuf.Write(p)
-	// 	reader, err := gzip.NewReader(&zBuf)
-	// 	if err != nil {
-	// 		return 0, err
-	// 	}
-	// 	// cc.wr.Write()
-	// }
-	return cc.wr.Write(p)
+func (cc *UnCompressConverter) Read(p []byte) (int, error) {
+	if cc.gzipReader == nil {
+		zr, err := gzip.NewReader(cc.wr)
+		if err != nil {
+			return 0, err
+		}
+		cc.gzipReader = zr
+	}
+	return cc.gzipReader.Read(p)
+}
+
+func (nc *NoneConverter) Close() error {
+	if nc.wr != nil {
+		if c, ok := nc.wr.(io.Closer); ok {
+			return c.Close()
+		}
+	}
+	return nil
+}
+
+func (nc *NoneConverter) Read(p []byte) (int, error) {
+	if nc.wr != nil {
+		return nc.wr.Read(p)
+	}
+	return 0, nil
 }
 
 // CompressStream2 将写入流进行压缩转换
