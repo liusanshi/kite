@@ -3,8 +3,8 @@ package task
 import (
 	"fmt"
 
-	"../util"
-	"./core"
+	"kite/src/task/core"
+	"kite/src/util"
 )
 
 //LockTask 删除分支的任务

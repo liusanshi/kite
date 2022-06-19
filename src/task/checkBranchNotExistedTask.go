@@ -3,8 +3,8 @@ package task
 import (
 	"fmt"
 
-	"../util"
-	"./core"
+	"kite/src/task/core"
+	"kite/src/util"
 )
 
 //CheckBranchNotExistedTask 检查分支是否不存在

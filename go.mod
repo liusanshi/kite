@@ -1,1 +1,3 @@
-module github.com/liusanshi/kite
+module kite
+
+go 1.18

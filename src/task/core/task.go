@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"../../util"
+	"kite/src/util"
 )
 
 var (

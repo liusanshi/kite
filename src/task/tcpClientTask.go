@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	"../util"
-	"./core"
-	"./message"
+	"kite/src/task/core"
+	"kite/src/task/message"
+	"kite/src/util"
 )
 
 //TCPClientTask tcp客户端

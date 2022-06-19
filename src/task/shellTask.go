@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os/exec"
 
-	"../util"
-	"./core"
-	"./message"
+	"kite/src/task/core"
+	"kite/src/task/message"
+	"kite/src/util"
 )
 
 //ShellTask shell任务

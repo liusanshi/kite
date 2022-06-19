@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"../util"
+	"kite/src/util"
 )
 
 //List 列出所有数据

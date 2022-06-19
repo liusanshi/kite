@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"../../util"
+	"kite/src/util"
 )
 
 //FileMessage 文件消息 用于上传文件

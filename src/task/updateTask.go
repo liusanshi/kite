@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"../util"
-	"./core"
+	"kite/src/task/core"
+	"kite/src/util"
 )
 
 //UpdateTask 更新分支的任务

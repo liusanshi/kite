@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"../message"
+	"kite/src/task/message"
 )
 
 // Session 会话

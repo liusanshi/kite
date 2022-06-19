@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"../task"
-	"../task/core"
-	"../util"
+	"kite/src/task"
+	"kite/src/task/core"
+	"kite/src/util"
 )
 
 //测试任务的序列化

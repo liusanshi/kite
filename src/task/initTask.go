@@ -3,8 +3,8 @@ package task
 import (
 	"path/filepath"
 
-	"../util"
-	"./core"
+	"kite/src/task/core"
+	"kite/src/util"
 )
 
 //InitTask 创建分支的任务

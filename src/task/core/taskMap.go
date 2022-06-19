@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"../../util"
+	"kite/src/util"
 )
 
 //Map 任务字典

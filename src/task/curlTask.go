@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"../util"
-	"./core"
-	"./message"
+	"kite/src/task/core"
+	"kite/src/task/message"
+	"kite/src/util"
 )
 
 // CurlMethod curl的类型

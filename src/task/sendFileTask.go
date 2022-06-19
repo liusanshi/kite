@@ -9,9 +9,9 @@ import (
 	"strings"
 	"sync"
 
-	"../util"
-	"./core"
-	"./message"
+	"kite/src/task/core"
+	"kite/src/task/message"
+	"kite/src/util"
 )
 
 const (

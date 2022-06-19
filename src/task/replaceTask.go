@@ -6,8 +6,8 @@ import (
 	"os"
 	"regexp"
 
-	"../util"
-	"./core"
+	"kite/src/task/core"
+	"kite/src/util"
 )
 
 //替换器

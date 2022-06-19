@@ -6,9 +6,9 @@ import (
 	"log"
 	"net"
 
-	"../util"
-	"./core"
-	"./message"
+	"kite/src/task/core"
+	"kite/src/task/message"
+	"kite/src/util"
 )
 
 //TCPServerTask tcp服务的任务

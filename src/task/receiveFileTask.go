@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"../util"
-	"./core"
-	"./message"
+	"kite/src/task/core"
+	"kite/src/task/message"
+	"kite/src/util"
 )
 
 //ReceiveFileTask 接收文件的任务

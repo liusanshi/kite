@@ -5,9 +5,9 @@ import (
 	"log"
 	"strings"
 
-	"./client"
-	"./config"
-	"./server"
+	"kite/src/client"
+	"kite/src/config"
+	"kite/src/server"
 )
 
 func main() {

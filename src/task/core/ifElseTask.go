@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"../../util"
+	"kite/src/util"
 )
 
 // IConditions 条件接口

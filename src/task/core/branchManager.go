@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"../../util"
+	"kite/src/util"
 )
 
 // Branch 分支信息

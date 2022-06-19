@@ -1,9 +1,9 @@
 package task
 
 import (
-	"../util"
-	"./core"
-	"./message"
+	"kite/src/task/core"
+	"kite/src/task/message"
+	"kite/src/util"
 )
 
 //ListTask 显示所有分支的list

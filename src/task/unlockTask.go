@@ -1,8 +1,8 @@
 package task
 
 import (
-	"../util"
-	"./core"
+	"kite/src/task/core"
+	"kite/src/util"
 )
 
 //UnlockTask 删除分支的任务

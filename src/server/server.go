@@ -7,9 +7,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	_ "../task" //只加载不执行
-	"../task/core"
-	"../util"
+	_ "kite/src/task" //只加载不执行
+	"kite/src/task/core"
+	"kite/src/util"
 )
 
 // Sev 服务入口

@@ -4,8 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"../util"
-	"./core"
+	"kite/src/task/core"
+	"kite/src/util"
 )
 
 //RemoveFileTask 删除文件任务

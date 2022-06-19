@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"../util"
-	"./core"
+	"kite/src/task/core"
+	"kite/src/util"
 )
 
 // ContainsTask 是否包含某个字符串的任务

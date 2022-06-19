@@ -6,9 +6,9 @@ import (
 	"io"
 	"os"
 
-	_ "../task" //只加载不执行
-	"../task/core"
-	"../util"
+	_ "kite/src/task" //只加载不执行
+	"kite/src/task/core"
+	"kite/src/util"
 )
 
 //Client 执行命令
